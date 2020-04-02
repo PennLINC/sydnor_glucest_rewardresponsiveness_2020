@@ -1,0 +1,304 @@
+---
+title: 'Reward Network GluCEST and RR Statistics: Sample Characteristics'
+author: "Valerie Jill Sydnor"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    toc: yes
+    toc_depth: '5'
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '5'
+theme: cerulean
+geometry: margin=1.9cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_knit$set(root.dir = './')
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=70),tidy=TRUE)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+```
+
+\  
+
+**Table 1**
+```{r, echo=F}
+#Table 1 inputs
+Demotable <- data.frame(Variable=character(),Study_Sample=double(), Typically_Developing=double(), Clinical=double(), Pvalue=double())
+Demotable <- Demotable %>% add_row(Variable = "Age", Study_Sample= 22.7, Typically_Developing= 22.6, Clinical= 22.9, Pvalue="n.s.")
+Demotable <- Demotable %>% add_row(Variable = "Sex (M)", Study_Sample = 15, Typically_Developing= 5 , Clinical= 10,  Pvalue="n.s.")
+Demotable <- Demotable %>% add_row(Variable = "BAS RR", Study_Sample = 17.4, Typically_Developing= 17.5, Clinical= 17.3,  Pvalue="n.s.")
+Demotable <- Demotable %>% add_row(Variable = "PROMIS", Study_Sample = 12.8, Typically_Developing= 9.7, Clinical= 14.4, Pvalue=0.0017)
+Demotable <- Demotable %>% add_row(Variable = "Prime", Study_Sample = 6.0, Typically_Developing= 0.5, Clinical= 8.7, Pvalue=0.0003)
+
+Demotable %>%
+  kable() %>%
+  kable_styling()
+```
+
+\newpage
+```{r echo=TRUE}
+#Read in sample demographics and clinical measures
+glucest <- read.csv("../../GLUCEST-Clinical-Demographics-Measures-N45.csv", header=TRUE) #csv created by Prepare_Demographics_ClinicalMeasures_Data.Rmd
+```
+
+#Sample Demographics and Clinical Characteristics (Table 1)
+
+##Study Sample (N=45)
+
+**Age**
+
+* Age Mean
+```{r}
+mean(glucest$age_scan)
+```
+* Age SD
+```{r}
+sd(glucest$age_scan)
+```
+
+**Sex**
+
+* Number Females
+```{r}
+length(which(glucest$sex == "2"))
+```
+* Number Males
+```{r}
+length(which(glucest$sex == "1"))
+```
+
+**Race**
+
+```{r}
+sample_race1_count <-  length(which(glucest$race == "1"))
+sample_race2_count <-  length(which(glucest$race == "2"))
+sample_race4_count <-  length(which(glucest$race == "4"))
+sample_race5_count <-  length(which(glucest$race == "5"))
+table(glucest$race)
+```
+
+**BAS Reward Responsivity Score**
+
+* BAS RR Score Mean
+```{r}
+mean(glucest$BAS_Reward_totalscore)
+```
+* BAS RR Score SD
+```{r}
+sd(glucest$BAS_Reward_totalscore)
+``` 
+
+**PROMIS Score**
+
+* PROMIS Score Mean
+```{r}
+mean(glucest$PROMIS_totalscore)
+```
+* PROMIS Score SD
+```{r}
+sd(glucest$PROMIS_totalscore)
+```
+
+**PRIME Score**
+
+* PRIME Score Mean
+```{r}
+mean(glucest$Prime_totalscore)
+```
+* PRIME Score SD
+```{r}
+sd(glucest$Prime_totalscore)
+```
+
+\newpage
+
+##Typically Developing (N=15)
+```{r}
+TD <- filter(glucest, Control_Coded == "1")
+```
+
+**Age**
+
+* Age Mean
+```{r}
+mean(TD$age_scan)
+```
+* Age SD
+```{r}
+sd(TD$age_scan)
+```
+
+**Sex**
+
+* Number Females
+```{r}
+length(which(TD$sex == "2"))
+```
+* Number Males
+```{r}
+length(which(TD$sex == "1"))
+```
+
+**Race**
+
+```{r}
+sample_race1_count <-  length(which(TD$race == "1"))
+sample_race2_count <-  length(which(TD$race == "2"))
+sample_race4_count <-  length(which(TD$race == "4"))
+sample_race5_count <-  length(which(TD$race == "5"))
+table(TD$race)
+```
+
+**BAS Reward Responsivity Score**
+
+* BAS RR Score Mean
+```{r}
+mean(TD$BAS_Reward_totalscore)
+```
+* BAS RR Score SD
+```{r}
+sd(TD$BAS_Reward_totalscore)
+``` 
+
+**PROMIS Score**
+
+* PROMIS Score Mean
+```{r}
+mean(TD$PROMIS_totalscore)
+```
+* PROMIS Score SD
+```{r}
+sd(TD$PROMIS_totalscore)
+
+```
+
+**PRIME Score**
+
+* PRIME Score Mean
+```{r}
+mean(TD$Prime_totalscore)
+```
+* PRIME Score SD
+```{r}
+sd(TD$Prime_totalscore)
+```
+
+\newpage
+
+##Clinical (N=30)
+```{r}
+clinical <- filter(glucest, Control_Coded == "0")
+```
+
+**Age**
+
+* Age Mean
+```{r}
+mean(clinical$age_scan)
+```
+* Age SD
+```{r}
+sd(clinical$age_scan)
+```
+
+**Sex**
+
+* Number Females
+```{r}
+length(which(clinical$sex == "2"))
+```
+* Number Males
+```{r}
+length(which(clinical$sex == "1"))
+```
+
+**Race**
+
+```{r}
+sample_race1_count <-  length(which(clinical$race == "1"))
+sample_race2_count <-  length(which(clinical$race == "2"))
+sample_race4_count <-  length(which(clinical$race == "4"))
+sample_race5_count <-  length(which(clinical$race == "5"))
+table(clinical$race)
+```
+
+**BAS Reward Responsivity Score**
+
+* BAS RR Score Mean
+```{r}
+mean(clinical$BAS_Reward_totalscore)
+```
+* BAS RR Score SD
+```{r}
+sd(clinical$BAS_Reward_totalscore)
+``` 
+
+**PROMIS Score**
+
+* PROMIS Score Mean
+```{r}
+mean(clinical$PROMIS_totalscore)
+```
+* PROMIS Score SD
+```{r}
+sd(clinical$PROMIS_totalscore)
+```
+
+**PRIME Score**
+
+* PRIME Score Mean
+```{r}
+mean(clinical$Prime_totalscore)
+```
+* PRIME Score SD
+```{r}
+sd(clinical$Prime_totalscore)
+```
+
+\newpage
+
+#Typically Developing v. Clinical Group Statistics (Table 1)
+
+##Age
+```{r}
+age.F.test <- var.test(TD$age_scan, clinical$age_scan) #F=1.0611, p=0.8558
+t.test(glucest$age_scan ~ glucest$Control_Coded, var.equal=TRUE)
+```
+
+##Sex
+```{r}
+chisq.test(glucest$sex, glucest$Control_Coded)
+```
+
+##Race
+```{r, warning=FALSE}
+glucest$race <- as.factor(glucest$race)
+chisq.test(glucest$race, glucest$Control_Coded)
+```
+
+##BAS Reward Responsivity Score
+```{r}
+BASRR.F.test <- var.test(TD$BAS_Reward_totalscore, clinical$BAS_Reward_totalscore) #F=0.412, p=0.0868
+t.test(glucest$BAS_Reward_totalscore ~ glucest$Control_Coded, var.equal=TRUE)
+```
+
+##PROMIS Depression Score
+```{r}
+PROMIS.F.test <- var.test(TD$PROMIS_totalscore, clinical$PROMIS_totalscore) #F=0.0668, p=3.812e-06
+t.test(glucest$PROMIS_totalscore ~ glucest$Control_Coded, var.equal=FALSE)
+```
+
+##PRIME Score
+```{r}
+PRIME.F.test <- var.test(TD$Prime_totalscore, clinical$Prime_totalscore) #F=0.0101, p=1.255e-11
+t.test(glucest$Prime_totalscore ~ glucest$Control_Coded, var.equal=FALSE)
+```
+  
+  

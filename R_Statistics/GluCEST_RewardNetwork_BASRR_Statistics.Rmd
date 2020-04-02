@@ -1,0 +1,544 @@
+---
+title: 'Reward Network GluCEST and RR Statistics: Reward Network Analyses'
+author: "Valerie Jill Sydnor"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    toc: yes
+    toc_depth: '5'
+theme: cerulean
+geometry: margin=1.9cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/valeriejill/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/OutputMeasures/")
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=65),tidy=TRUE)
+library(plyr)
+library(dplyr)
+library(knitr)
+library(reader)
+library(kableExtra)
+library(ggplot2)
+library(ppcor)
+```
+
+\newpage
+
+```{r include=FALSE}
+#read in sample demographics and clinical measures
+glucest <- read.csv("../GLUCEST-Clinical-Demographics-Measures-N45.csv", header=TRUE) #csv created by Prepare_Demographics_ClinicalMeasures_Data.Rmd
+```
+
+```{r include=FALSE}
+#Read in GluCEST % Contrast Measures, GM Density Measures, and Reward Network Coverage Measures
+
+#list all .csv files in root directory
+files <- list.files(getwd(), pattern='.csv', ignore.case=T, full.names = F) 
+
+filenames <- c()
+#generate variable names to assign file data to 
+for(name in files){
+  #remove "-Measures.csv"" from end of filename
+  Rname <- gsub('.{13}$', '', name)
+  #replace - with _ for R compatibility 
+  Rname <- chartr(old = "-", new = "_", Rname) 
+  #save filenames into a character vector 
+  filenames <- append(filenames, Rname) 
+}
+
+#read in files and assign to variables
+for(i in 1:13){
+  #save filename as an individual string
+  Rfilename <- sprintf("%s",filenames[i]) 
+  #read in csv data for each file
+  x <- read.csv(files[i], header=TRUE, sep='\t') 
+  #assign csv data to Rfilename string 
+  assign(Rfilename, x) 
+}
+rm(x)
+```
+
+\newpage
+
+#Reward Network GluCEST v. Non-Reward GluCEST and RR 
+
+**Multiple Linear Regression**
+```{r}
+#linear regression with age, sex, Reward Network GluCEST and Non-Reward GluCEST predicting BAS RR
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork$RewardNetwork_CEST_mean + GluCEST_NonReward$NonReward_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+**Reward Network Partial R**
+```{r}
+covariates <- data.frame(GluCEST_NonReward$NonReward_CEST_mean, glucest$age_scan, glucest$sex)
+pcor.test(glucest$BAS_Reward_totalscore, GluCEST_RewardNetwork$RewardNetwork_CEST_mean, covariates)$estimate
+```
+
+**Non-Reward Network Partial R**
+```{r}
+covariates <- data.frame(GluCEST_RewardNetwork$RewardNetwork_CEST_mean, glucest$age_scan, glucest$sex)
+pcor.test(glucest$BAS_Reward_totalscore, GluCEST_NonReward$NonReward_CEST_mean, covariates)$estimate
+```
+
+**Reward Network Association Plot (Figure 2)**
+```{r echo=TRUE}
+plotdata <- data.frame(glucest$BAS_Reward_totalscore, GluCEST_RewardNetwork$RewardNetwork_CEST_mean)
+
+jpeg("/Users/valeriejill/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/Figures/Images/BASRR_RewardNetworkTotal_CorrelationPlot.jpg", units="in", width=7.3, height=6.6, res=800)
+
+ggplot(plotdata, aes(x=glucest.BAS_Reward_totalscore, y=GluCEST_RewardNetwork.RewardNetwork_CEST_mean)) + 
+  geom_point(color="black", fill=alpha(c("#860000"),.99), shape=21, size=3) +
+  labs(x="\nBAS Reward Responsiveness Score\n", y="\nGluCEST % Contrast\n") +
+  ggtitle("\n") +
+  theme(
+  axis.title.x=element_text(family="Arial", vjust=0.5, size=17),
+  axis.title.y=element_text(family="Arial",  size=17),
+  axis.line = element_line(colour = "black"),
+  axis.text=element_text(family="Arial",size=18),
+  panel.background=element_blank(),
+  axis.text.x = element_text(color="black"),
+  axis.text.y = element_text(color="black")) + 
+  geom_smooth(method='lm', se=TRUE, fill=alpha(c("#ad0000"),.2), col="black") +
+  theme(legend.title=element_blank()) +
+  scale_y_continuous(breaks=c(6.5,7,7.5,8,8.5,9)) 
+```
+
+**Reward Network GluCEST Between Typically Developing and Clinical Groups**
+```{r}
+summary(aov(GluCEST_RewardNetwork$RewardNetwork_CEST_mean ~ as.factor(glucest$Control_Coded) + glucest$age + glucest$sex))
+```
+
+\newpage
+
+#Reward Network Anatomical Subdivision: Cortical and Subcortical GluCEST and RR
+
+##Cortical Reward Network
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_Cortical$RewardNetwork_Cortical_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex)
+pcor.test(GluCEST_RewardNetwork_Cortical$RewardNetwork_Cortical_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+##Subcortical Reward Network
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_Subcortical$RewardNetwork_Subcortical_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex)
+pcor.test(GluCEST_RewardNetwork_Subcortical$RewardNetwork_Subcortical_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+**Subcortical Reward Network Association Plot (Figure 3)**
+```{r}
+plotdata <- data.frame(glucest$BAS_Reward_totalscore, GluCEST_RewardNetwork_Subcortical$RewardNetwork_Subcortical_CEST_mean)
+color <- c("#ffdb3c")
+decimalscale <- function(x) sprintf("%.1f", x)
+
+jpeg("/Users/valeriejill/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/Figures/Images/BASRR_RewardNetworkSubcortical_CorrelationPlot.jpg", units="in", width=7.3, height=6.6, res=800)
+
+
+ggplot(plotdata, aes(x=glucest.BAS_Reward_totalscore, y=GluCEST_RewardNetwork_Subcortical.RewardNetwork_Subcortical_CEST_mean)) +
+ geom_point(color="black", fill=alpha(color,.99), shape=21, size=3) +
+  labs(x="\nBAS Reward Responsiveness Score\n", y="\nGluCEST % Contrast\n") +
+  ggtitle("\n") +
+  theme(
+  axis.title.x=element_text(family="Arial", vjust=0.5, size=17),
+  axis.title.y=element_text(family="Arial",  size=17),
+  axis.line = element_line(colour = "black"),
+  axis.text=element_text(family="Arial",size=18),
+  panel.background=element_blank(),
+  axis.text.x = element_text(color="black"),
+  axis.text.y = element_text(color="black")) + 
+  geom_smooth(method='lm', se=TRUE, fill=alpha(c("gold"),.7), col="black") +
+  theme(legend.title=element_blank()) +
+  scale_y_continuous(breaks=c(6.0,7.0,8.0,9.0, 10.0, 11.0), labels=decimalscale) 
+```
+
+###FDR correction 
+```{r echo=TRUE}
+ps <- c("0.1439989", "0.01326643") #p-values from multiple regressions
+fdr.ps <- p.adjust(ps, method="fdr")
+```
+
+*Cortical Reward*
+```{r}
+fdr.ps[1]
+```
+
+*Subcortical Reward*
+```{r}
+fdr.ps[2]
+```
+
+\newpage
+
+#Reward Network Valence Subdivision: Appetitive, Aversive, and Salience GluCEST and RR 
+
+##Reward Network Appetitive Component
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_PositiveOnly$RewardNetwork_Positive_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex)
+pcor.test(GluCEST_RewardNetwork_PositiveOnly$RewardNetwork_Positive_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+##Reward Network Aversive Component
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_NegativeOnly$RewardNetwork_Negative_CEST_mean  + glucest$age_scan + glucest$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex)
+pcor.test(GluCEST_RewardNetwork_NegativeOnly$RewardNetwork_Negative_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+##Reward Network Salience Component
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_Salience$RewardNetworkC_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex)
+pcor.test(GluCEST_RewardNetwork_Salience$RewardNetworkC_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+**Partial R Plot (Figure 4)**
+```{r}
+valence.analysis.results <- data.frame(Mask=character(), PartialR=double())
+valence.analysis.results <- valence.analysis.results %>% add_row(Mask= "Reward Network", PartialR= 0.31)
+valence.analysis.results <- valence.analysis.results %>% add_row(Mask= "Reward: Appetitive", PartialR= 0.29)
+valence.analysis.results <- valence.analysis.results %>% add_row(Mask= "Reward: Aversive", PartialR= 0.23)
+valence.analysis.results <- valence.analysis.results %>% add_row(Mask= "Reward: Salience", PartialR= 0.42)
+valence.analysis.results <- valence.analysis.results %>% add_row(Mask= "Non Reward", PartialR= 0.03)
+
+jpeg("/Users/valeriejill/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/Figures/Images/BASRR_RewardNetworkTotal_Valence_PartialR.jpg", units="in", width=7.3, height=6.6, res=800)
+
+ggplot(data=valence.analysis.results, aes(x=Mask, y=PartialR, fill=Mask)) + geom_col() + 
+  labs(x="") +
+  labs(y="\nPartial R") +
+  ggtitle("\n") +
+  theme_minimal()+
+  theme(
+  axis.title.x=element_text(family="Arial", vjust=0.5, size=12),
+  axis.title.y=element_text(family="Arial",  size=15),
+  axis.line = element_line(colour = "black"),
+  axis.text.y.left = element_text(family="Arial", size=18),
+  axis.text.x = element_text(color="black"),
+  axis.text.y = element_text(color="black"),
+  panel.grid.major.y = element_line(colour = "gray90"),
+  panel.grid.major.x = element_line(colour = "white"),
+  legend.position = "none") +
+  scale_fill_manual(values=c("#710002", "#3a0807", "#3a0807","#3a0807","#09003b"))
+  scale_y_continuous(limits = c(0,0.45), breaks=c(0,0.1,0.2,0.3,0.4)) 
+```
+
+###FDR correction
+```{r echo=TRUE}
+ps <- c("0.05553093","0.1337805","0.004709815") #p-values from multiple regressions
+fdr.ps <- p.adjust(ps, method="fdr")
+```
+
+*Reward Appetitive Component*
+```{r}
+fdr.ps[1]
+```
+
+*Reward Aversive Component*
+```{r}
+fdr.ps[2]
+```
+
+*Reward Salience Component*
+```{r}
+fdr.ps[3]
+```
+
+\newpage 
+
+#Sensitivity Analyses
+
+**Gray Matter Density**
+
+* Multiple Linear Regression
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex and GM density
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork$RewardNetwork_CEST_mean + glucest$age_scan + glucest$sex + GMDensity_RewardNetwork$RewardNetwork_GMDensity_mean))
+```
+
+* Partial R
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex, GMDensity_RewardNetwork$RewardNetwork_GMDensity_mean)
+pcor.test(GluCEST_RewardNetwork$RewardNetwork_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+**Reward Network Percent Coverage**
+
+* Multiple Linear Regression
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex and network percent coverage
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork$RewardNetwork_CEST_mean + glucest$age_scan + glucest$sex + RewardNetwork_PercentCoverage$RewardNetwork_PercentCoverage))
+```
+
+* Partial R
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex, RewardNetwork_PercentCoverage$RewardNetwork_PercentCoverage)
+pcor.test(GluCEST_RewardNetwork$RewardNetwork_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+**Heatmap Analysis**
+
+* Multiple Linear Regression
+```{r}
+#linear regression between GluCEST in 50% overlap voxels and RR controlling for age and sex 
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork_Heatmap50$RewardNetwork_50_CEST_mean + glucest$age_scan + glucest$sex))
+```
+
+* Partial R
+```{r}
+heatmap.data <- data.frame(GluCEST_RewardNetwork_Heatmap50$RewardNetwork_50_CEST_mean, glucest$BAS_Reward_totalscore, glucest$age_scan, glucest$sex)
+heatmap.data <- heatmap.data %>% filter(GluCEST_RewardNetwork_Heatmap50.RewardNetwork_50_CEST_mean != "NA") #remove one case with no 50% overlap voxels
+covariates <- data.frame(heatmap.data$glucest.age_scan, heatmap.data$glucest.sex)
+pcor.test(heatmap.data$GluCEST_RewardNetwork_Heatmap50.RewardNetwork_50_CEST_mean, heatmap.data$glucest.BAS_Reward_totalscore, covariates)$estimate
+```
+
+**Group**
+
+* Multiple Linear Regression
+```{r}
+#linear regression between GluCEST and RR controlling for age and sex and typically developing versus clinical group
+summary(lm(glucest$BAS_Reward_totalscore ~ GluCEST_RewardNetwork$RewardNetwork_CEST_mean + glucest$age_scan + glucest$sex + glucest$Control_Coded))
+```
+
+* Partial R
+```{r}
+covariates <- data.frame(glucest$age_scan, glucest$sex, glucest$Control_Coded)
+pcor.test(GluCEST_RewardNetwork$RewardNetwork_CEST_mean, glucest$BAS_Reward_totalscore, covariates)$estimate
+```
+
+#Specificity Analyses
+
+**PRIME Scores**
+```{r}
+#linear regression between GluCEST and PRIME scores controlling for BAS Reward Responsivity, age, and sex
+summary(lm(GluCEST_RewardNetwork$RewardNetwork_CEST_mean ~ glucest$Prime_totalscore + glucest$BAS_Reward_totalscore + glucest$age_scan + glucest$sex))
+```
+
+**PROMIS Scores**
+```{r}
+#linear regression between GluCEST and PROMIS scores controlling for BAS Reward Responsivity, age, and sex
+summary(lm(GluCEST_RewardNetwork$RewardNetwork_CEST_mean ~ glucest$PROMIS_totalscore + glucest$BAS_Reward_totalscore + glucest$age_scan + glucest$sex))
+```
+
+**BAS Drive Scores**
+```{r}
+#linear regression between GluCEST and BAS Drive scores controlling for BAS Reward Responsivity, age, and sex
+summary(lm(GluCEST_RewardNetwork$RewardNetwork_CEST_mean ~ glucest$BAS_Drive_totalscore + glucest$BAS_Reward_totalscore + glucest$age_scan + glucest$sex))
+```
+
+**BAS Fun Scores**
+```{r}
+#linear regression between GluCEST and BAS Fun scores controlling for BAS Reward Responsivity, age, and sex
+summary(lm(GluCEST_RewardNetwork$RewardNetwork_CEST_mean ~ glucest$BAS_Fun_totalscore + glucest$BAS_Reward_totalscore + glucest$age_scan + glucest$sex))
+```
+
+\newpage
+
+#Reward Network by Anatomical Region: Harvard Oxford Region GluCEST and RR 
+
+##Harvard Oxford Reward Network: Cortical Regions
+
+**Filter data for reward network cortical regions, using > 50 mm^3 as region volume threshold for inclusion in analysis**
+```{r echo=FALSE}
+#get data for the 7 Harvard Oxford cortical regions reliably present in the GluCEST reward network, and filter out cases that do not meet the minimum coverage requirement ( > 50 mm^3 for each region)
+
+frontal.pole <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Frontal_Pole_mean, GluCEST_HarvardOxford_Cortical_Reward$Frontal_Pole_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+frontal.pole <- filter(frontal.pole, GluCEST_HarvardOxford_Cortical_Reward.Frontal_Pole_numvoxels > 10 )
+
+superior.frontal <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$SFG_mean, GluCEST_HarvardOxford_Cortical_Reward$SFG_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+superior.frontal <- filter(superior.frontal, GluCEST_HarvardOxford_Cortical_Reward.SFG_numvoxels > 10)
+
+frontal.medial <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Frontal_Medial_Cortex_mean,  GluCEST_HarvardOxford_Cortical_Reward$Frontal_Medial_Cortex_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+frontal.medial <- filter(frontal.medial, GluCEST_HarvardOxford_Cortical_Reward.Frontal_Medial_Cortex_numvoxels > 10 )
+
+subcallosal.cortex <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Subcallosal_Cortex_mean,  GluCEST_HarvardOxford_Cortical_Reward$Subcallosal_Cortex_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+subcallosal.cortex <- filter(subcallosal.cortex, GluCEST_HarvardOxford_Cortical_Reward.Subcallosal_Cortex_numvoxels > 10 )
+
+paracingulate <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Paracingulate_Gyrus_mean,  GluCEST_HarvardOxford_Cortical_Reward$Paracingulate_Gyrus_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+paracingulate <- filter(paracingulate, GluCEST_HarvardOxford_Cortical_Reward.Paracingulate_Gyrus_numvoxels > 10 )
+
+anterior.cingulate <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Anterior_cingulate_mean, GluCEST_HarvardOxford_Cortical_Reward$Anterior_cingulate_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+anterior.cingulate <- filter(anterior.cingulate, GluCEST_HarvardOxford_Cortical_Reward.Anterior_cingulate_numvoxels > 10 )
+
+posterior.cingulate <- data.frame(GluCEST_HarvardOxford_Cortical_Reward$Posterior_cingulate_mean,  GluCEST_HarvardOxford_Cortical_Reward$Posterior_cingulate_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+posterior.cingulate <- filter(posterior.cingulate, GluCEST_HarvardOxford_Cortical_Reward.Posterior_cingulate_numvoxels > 10 )
+```
+
+**Frontal Pole**
+```{r echo=FALSE}
+covariates <- data.frame(frontal.pole$glucest.sex, frontal.pole$glucest.age_scan)
+pcor.test(frontal.pole$GluCEST_HarvardOxford_Cortical_Reward.Frontal_Pole_mean, frontal.pole$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**SFG**
+```{r echo=FALSE}
+covariates <- data.frame(superior.frontal$glucest.sex, superior.frontal$glucest.age_scan)
+pcor.test(superior.frontal$GluCEST_HarvardOxford_Cortical_Reward.SFG_mean, superior.frontal$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Frontal Medial Cortex**
+```{r echo=FALSE}
+covariates <- data.frame(frontal.medial$glucest.sex, frontal.medial$glucest.age_scan)
+pcor.test(frontal.medial$GluCEST_HarvardOxford_Cortical_Reward.Frontal_Medial_Cortex_mean, frontal.medial$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Subcollosal Cortex**
+```{r echo=FALSE}
+covariates <- data.frame(subcallosal.cortex$glucest.sex, subcallosal.cortex$glucest.age_scan)
+pcor.test(subcallosal.cortex$GluCEST_HarvardOxford_Cortical_Reward.Subcallosal_Cortex_mean, subcallosal.cortex$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Paracingulate Gyrus**
+```{r echo=FALSE}
+covariates <- data.frame(paracingulate$glucest.sex, paracingulate$glucest.age_scan)
+pcor.test(paracingulate$GluCEST_HarvardOxford_Cortical_Reward.Paracingulate_Gyrus_mean, paracingulate$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Anterior Cingulate**
+```{r echo=FALSE}
+covariates <- data.frame(anterior.cingulate$glucest.sex, anterior.cingulate$glucest.age_scan)
+pcor.test(anterior.cingulate$GluCEST_HarvardOxford_Cortical_Reward.Anterior_cingulate_mean, anterior.cingulate$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Posterior Cingulate**
+```{r echo=FALSE}
+covariates <- data.frame(posterior.cingulate$glucest.sex, posterior.cingulate$glucest.age_scan)
+pcor.test(posterior.cingulate$GluCEST_HarvardOxford_Cortical_Reward.Posterior_cingulate_mean, posterior.cingulate$glucest.BAS_Reward_totalscore, covariates)
+```
+
+\newpage 
+
+##Harvard Oxford Reward Network: Subcortical Regions
+
+**Filter data for reward network subcortical regions, using > 50 mm^3 as region volume threshold for inclusion in analysis**
+
+```{r echo=FALSE}
+#get data for the 4 Harvard Oxford subcortical regions reliably present in the GluCEST reward network, and filter out cases that do not meet the minimum coverage requirement ( > 50 mm^3 for each region)
+
+GluCEST_HarvardOxford_SubCortical_Reward <- GluCEST_HarvardOxford_SubCortical_Reward %>% mutate(BrainStem.Midbrain_mean = ((((Brain.Stem_mean)*(Brain.Stem_numvoxels)) + ((Unlabeled_voxels_mean)*(Unlabeled_voxels_numvoxels)))/((Brain.Stem_numvoxels)+(Unlabeled_voxels_numvoxels))))
+
+GluCEST_HarvardOxford_SubCortical_Reward <- GluCEST_HarvardOxford_SubCortical_Reward %>% mutate(BrainStem.Midbrain_numvoxels = ((Brain.Stem_numvoxels)+(Unlabeled_voxels_numvoxels)))
+
+brainstem.midbrain <- data.frame(GluCEST_HarvardOxford_SubCortical_Reward$BrainStem.Midbrain_mean,  GluCEST_HarvardOxford_SubCortical_Reward$BrainStem.Midbrain_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore )
+brainstem.midbrain <- filter(brainstem.midbrain, GluCEST_HarvardOxford_SubCortical_Reward.BrainStem.Midbrain_numvoxels > 10 )
+
+thalamus <-  data.frame(GluCEST_HarvardOxford_SubCortical_Reward$Right_Thalamus_mean,  GluCEST_HarvardOxford_SubCortical_Reward$Right_Thalamus_numvoxels, glucest$age_scan, glucest$sex, glucest$BAS_Reward_totalscore)
+thalamus <- filter(thalamus, GluCEST_HarvardOxford_SubCortical_Reward.Right_Thalamus_numvoxels > 10 )
+
+caudate <-  data.frame(GluCEST_HarvardOxford_SubCortical_Reward$Right_Caudate_mean,  GluCEST_HarvardOxford_SubCortical_Reward$Right_Caudate_numvoxels,  glucest$age_scan,glucest$sex, glucest$BAS_Reward_totalscore)
+caudate <- filter(caudate, GluCEST_HarvardOxford_SubCortical_Reward.Right_Caudate_numvoxels > 10 )
+
+accumbens <-  data.frame(GluCEST_HarvardOxford_SubCortical_Reward$Right_Accumbens_mean,  GluCEST_HarvardOxford_SubCortical_Reward$Right_Accumbens_numvoxels, glucest$age_scan,glucest$sex, glucest$BAS_Reward_totalscore)
+accumbens <- filter(accumbens, GluCEST_HarvardOxford_SubCortical_Reward.Right_Accumbens_numvoxels > 10 )
+```
+
+**Thalamus**
+```{r echo=FALSE}
+covariates <- data.frame(thalamus$glucest.sex, thalamus$glucest.age_scan)
+pcor.test(thalamus$GluCEST_HarvardOxford_SubCortical_Reward.Right_Thalamus_mean, thalamus$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Caudate**
+```{r echo=FALSE}
+covariates <- data.frame(caudate$glucest.sex, caudate$glucest.age_scan)
+pcor.test(caudate$GluCEST_HarvardOxford_SubCortical_Reward.Right_Caudate_mean, caudate$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Accumbens**
+```{r echo=FALSE}
+covariates <- data.frame(accumbens$glucest.sex, accumbens$glucest.age_scan)
+pcor.test(accumbens$GluCEST_HarvardOxford_SubCortical_Reward.Right_Accumbens_mean, accumbens$glucest.BAS_Reward_totalscore, covariates)
+```
+
+**Brainstem and Midbrain**
+```{r echo=FALSE}
+covariates <- data.frame(brainstem.midbrain$glucest.sex, brainstem.midbrain$glucest.age_scan)
+pcor.test(brainstem.midbrain$GluCEST_HarvardOxford_SubCortical_Reward.BrainStem.Midbrain_mean, brainstem.midbrain$glucest.BAS_Reward_totalscore, covariates)
+```
+
+\newpage
+
+**Partial R Plot (Supplemental Figure S1)**
+
+```{r echo=TRUE}
+reward.HO.results <- data.frame(Region=character(), PartialR=double())
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Frontal Medial", PartialR= -0.06)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Frontal Pole", PartialR= 0.11)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Anterior Cingulate", PartialR= 0.11)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Superior Frontal", PartialR= 0.13)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Subcallosal", PartialR= 0.29)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Paracingulate", PartialR= 0.29)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Accumbens", PartialR= 0.29)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Midbrain/Brainstem", PartialR= 0.31)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Thalamus", PartialR= 0.36)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Posterior Cingulate", PartialR= 0.40)
+reward.HO.results <- reward.HO.results %>% add_row(Region= "Caudate", PartialR= 0.47)
+
+jpeg("/Users/valeriejill/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/Figures/Images/BASRR_RewardNetworkTotal_HarvardOxford_PartialR.jpg", units="in", width=7.3, height=6.6, res=800)
+
+ggplot(data=reward.HO.results, aes(x=Region, y=PartialR, fill=Region)) + geom_col() + 
+  labs(x="") +
+  labs(y="\nPartial R\n") +
+  ggtitle("\n") +
+  theme_minimal()+
+  theme(
+  axis.title.y=element_text(family="Times",  size=20),
+  axis.text.y.left= element_text(family="Times",size=18),
+  axis.text.x.bottom = element_text(color="black", , angle = 35, hjust= 1.1, vjust= 1.05, size=15),
+  axis.text.x = element_text(color="black"),
+  axis.text.y = element_text(color="black"),
+  axis.line = element_line(colour = "white"),
+  axis.line.x = element_line(colour = "black"),
+  axis.line.y = element_line(colour = "black"),
+  panel.grid.major.y = element_line(colour = "gray90"),
+  panel.grid.major.x = element_line(colour = "white"),
+  legend.position = "none") +
+  scale_y_continuous(breaks=c(0,0.1,0.2,0.3,0.4,0.5), limits = c(-0.07,.5)) +
+  scale_fill_manual(values=c("#7c0082", "#7c0082", "#7c0082", "#7c0082", "#7c0082", "#7c0082", "#ffdb3c", "#ffdb3c","#ffdb3c","#7c0082","#ffdb3c"))
+```
+
+###FDR correction
+```{r echo=TRUE}
+ps <- c("0.5243663","0.4162064","0.6619631","0.0621055","0.05856767","0.4718429","0.03024202","0.01662653","0.07915414","0.2245098","0.04523888") #p-values from pcor.test
+fdr.ps <- p.adjust(ps, method="fdr")
+fdr.ps
+```
+
