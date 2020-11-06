@@ -1,0 +1,187 @@
+---
+title: 'Reward Network GluCEST and RR Statistics: Diagnostic Category ROI Analyses'
+author: "Valerie Jill Sydnor"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    toc: yes
+    toc_depth: '5'
+theme: cerulean
+geometry: margin=1.9cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/OutputMeasures/")
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=65),tidy=TRUE)
+library(plyr)
+library(dplyr)
+library(knitr)
+library(ggplot2)
+```
+
+\newpage 
+
+```{r include=FALSE}
+#read in sample demographics and clinical measures
+glucest <- read.csv("../GLUCEST-Clinical-Demographics-Measures-N45.csv", header=TRUE) #csv created by Prepare_Demographics_ClinicalMeasures_Data.Rmd
+glucest$Control_Coded <- as.factor(glucest$Control_Coded)
+
+#Read in GluCEST % Contrast Measures for Harvard Oxford Atlas Anatomical ROIs
+HO.cortical <- read.csv("./GluCEST-HarvardOxford-Cortical-Measures.csv", header=TRUE, sep ='\t')
+HO.cortical <- HO.cortical %>% dplyr::select(-Subject)
+HO.subcortical <- read.csv("./GluCEST-HarvardOxford-SubCortical-Measures.csv", header=TRUE, sep ='\t')
+HO.subcortical <- HO.subcortical %>% dplyr::select(-Subject)
+
+#Merge data frames
+glucest <- cbind(glucest, HO.cortical, HO.subcortical)
+
+#Extract data for TD group only
+glucest.TD <- glucest %>% filter(Diagnosis_NC_MDD_Pro_Schiz_Coded == 1)
+#Extract data for MDD group only
+glucest.MDD <- glucest %>% filter(Diagnosis_NC_MDD_Pro_Schiz_Coded == 2)
+#Extract data for Prodomal group only
+glucest.PRO <- glucest %>% filter(Diagnosis_NC_MDD_Pro_Schiz_Coded == 3)
+#Extract data for PSY group only  
+glucest.PSY <- glucest %>% filter(Diagnosis_NC_MDD_Pro_Schiz_Coded == 4)
+
+#TD-MDD Data frame
+glucest.TD.MDD <- rbind(glucest.TD, glucest.MDD)
+
+#TD-PRO Data frame
+glucest.TD.PRO <- rbind(glucest.TD, glucest.PRO)
+
+#TD-PSY Data frame
+glucest.TD.PSY <- rbind(glucest.TD, glucest.PSY)
+
+#PSY-PRO Data frame
+glucest.PRO.PSY <- rbind(glucest.PRO, glucest.PSY)
+glucest.PRO.PSY$Diagnosis_NC_MDD_Pro_Schiz_Coded <- as.factor(glucest.PRO.PSY$Diagnosis_NC_MDD_Pro_Schiz_Coded)
+```
+
+\newpage
+
+# Case-Control Analysis: Typically Developing v. Psychotic Disorder Groups
+
+## Anterior Cingulate
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Anterior_cingulate_mean)
+control_sd = sd(glucest.TD$Anterior_cingulate_mean)
+glucest.TD.PSY$Anterior_cingulate_zscore <- round((glucest.TD.PSY$Anterior_cingulate_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.PSY %>% group_by(Control_Coded) %>% summarise_at(vars(Anterior_cingulate_zscore), funs(mean(.)))
+```
+
+* ANCOVA
+```{r}
+summary(aov(Anterior_cingulate_mean ~ age_scan + sex + Control_Coded, data=glucest.TD.PSY))
+```
+
+
+## Thalamus
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Right_Thalamus_mean)
+control_sd = sd(glucest.TD$Right_Thalamus_mean)
+glucest.TD.PSY$Right_Thalamus_zscore <- round((glucest.TD.PSY$Right_Thalamus_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.PSY %>% group_by(Control_Coded) %>% summarise_at(vars(Right_Thalamus_zscore), funs(mean(.)))
+```
+
+* ANCOVA
+```{r}
+summary(aov(Right_Thalamus_mean ~ age_scan + sex + Control_Coded, data=glucest.TD.PSY))
+```
+
+\newpage
+
+# Case-Control Analysis: Typically Developing v. Depressive Disorders Groups
+
+## Anterior Cingulate
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Anterior_cingulate_mean)
+control_sd = sd(glucest.TD$Anterior_cingulate_mean)
+glucest.TD.MDD$Anterior_cingulate_zscore <- round((glucest.TD.MDD$Anterior_cingulate_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.MDD %>% group_by(Control_Coded) %>% summarise_at(vars(Anterior_cingulate_zscore), funs(mean(.))) 
+```
+
+* ANCOVA
+```{r}
+summary(aov(Anterior_cingulate_mean ~ age_scan + sex + Control_Coded, data=glucest.TD.MDD))
+```
+
+
+## Thalamus
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Right_Thalamus_mean)
+control_sd = sd(glucest.TD$Right_Thalamus_mean)
+glucest.TD.MDD$Right_Thalamus_zscore <- round((glucest.TD.MDD$Right_Thalamus_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.MDD %>% group_by(Control_Coded) %>% summarise_at(vars(Right_Thalamus_zscore), funs(mean(.)))
+```
+* ANCOVA
+```{r}
+summary(aov(Right_Thalamus_mean ~ age_scan + sex + Control_Coded, data=glucest.TD.MDD))
+```
+
+\newpage 
+
+# Case-Control Analysis: Typically Developing v. Prodromal Symptoms Groups
+
+## Anterior Cingulate
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Anterior_cingulate_mean)
+control_sd = sd(glucest.TD$Anterior_cingulate_mean)
+glucest.TD.PRO$Anterior_cingulate_zscore <- round((glucest.TD.PRO$Anterior_cingulate_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.PRO %>% group_by(Control_Coded) %>% summarise_at(vars(Anterior_cingulate_zscore), funs(mean(.)))
+```
+
+* ANCOVA
+```{r}
+summary(aov(Anterior_cingulate_mean ~ age_scan + sex + Control_Coded, data=glucest.TD.PRO))
+```
+
+
+## Thalamus
+
+* Z-scores
+```{r}
+control_mean = mean(glucest.TD$Right_Thalamus_mean)
+control_sd = sd(glucest.TD$Right_Thalamus_mean)
+glucest.TD.PRO$Right_Thalamus_zscore <- round((glucest.TD.PRO$Right_Thalamus_mean - control_mean) / (control_sd), digits=2)
+
+glucest.TD.PRO %>% group_by(Control_Coded) %>% summarise_at(vars(Right_Thalamus_zscore), funs(mean(.)))
+```
+* ANCOVA
+```{r}
+summary(aov(Right_Thalamus_mean ~  age_scan + sex + Control_Coded, data=glucest.TD.PRO))
+```
+
+# Prodromal Symptoms v. Diagnosed Psychotic Disorder
+
+## Anterior Cingulate
+
+* Group means
+```{r}
+glucest.PRO.PSY %>% group_by(Diagnosis_NC_MDD_Pro_Schiz_Coded) %>% summarise_at(vars(Anterior_cingulate_mean), funs(mean(.)))
+```
+
+## Thalamus
+
+* Group means
+```{r}
+glucest.PRO.PSY %>% group_by(Diagnosis_NC_MDD_Pro_Schiz_Coded) %>% summarise_at(vars(Right_Thalamus_mean), funs(mean(.)))
+```

@@ -30,12 +30,12 @@ library(kableExtra)
 **Table 1**
 ```{r, echo=F}
 #Table 1 inputs
-Demotable <- data.frame(Variable=character(),Study_Sample=double(), Typically_Developing=double(), Clinical=double(), Pvalue=double())
-Demotable <- Demotable %>% add_row(Variable = "Age", Study_Sample= 22.7, Typically_Developing= 22.6, Clinical= 22.9, Pvalue="n.s.")
+Demotable <- data.frame(Variable=character(),Study_Sample=double(), Typically_Developing=double(), Clinical=double(), Pvalue=character())
+Demotable <- Demotable %>% add_row(Variable = "Age", Study_Sample= 22.7, Typically_Developing= 22.6, Clinical= 22.9, Pvalue=as.character("n.s."))
 Demotable <- Demotable %>% add_row(Variable = "Sex (M)", Study_Sample = 15, Typically_Developing= 5 , Clinical= 10,  Pvalue="n.s.")
 Demotable <- Demotable %>% add_row(Variable = "BAS RR", Study_Sample = 17.4, Typically_Developing= 17.5, Clinical= 17.3,  Pvalue="n.s.")
-Demotable <- Demotable %>% add_row(Variable = "PROMIS", Study_Sample = 12.8, Typically_Developing= 9.7, Clinical= 14.4, Pvalue=0.0017)
-Demotable <- Demotable %>% add_row(Variable = "Prime", Study_Sample = 6.0, Typically_Developing= 0.5, Clinical= 8.7, Pvalue=0.0003)
+Demotable <- Demotable %>% add_row(Variable = "PROMIS", Study_Sample = 12.8, Typically_Developing= 9.7, Clinical= 14.4, Pvalue="0.0017")
+Demotable <- Demotable %>% add_row(Variable = "Prime", Study_Sample = 6.0, Typically_Developing= 0.5, Clinical= 8.7, Pvalue="0.0003")
 
 Demotable %>%
   kable() %>%
@@ -84,7 +84,7 @@ sample_race5_count <-  length(which(glucest$race == "5"))
 table(glucest$race)
 ```
 
-**BAS Reward Responsivity Score**
+**BAS Reward Responsiveness Score**
 
 * BAS RR Score Mean
 ```{r}
@@ -156,7 +156,7 @@ sample_race5_count <-  length(which(TD$race == "5"))
 table(TD$race)
 ```
 
-**BAS Reward Responsivity Score**
+**BAS Reward Responsiveness Score**
 
 * BAS RR Score Mean
 ```{r}
@@ -229,7 +229,7 @@ sample_race5_count <-  length(which(clinical$race == "5"))
 table(clinical$race)
 ```
 
-**BAS Reward Responsivity Score**
+**BAS Reward Responsiveness Score**
 
 * BAS RR Score Mean
 ```{r}
@@ -283,7 +283,7 @@ glucest$race <- as.factor(glucest$race)
 chisq.test(glucest$race, glucest$Control_Coded)
 ```
 
-##BAS Reward Responsivity Score
+##BAS Reward Responsiveness Score
 ```{r}
 BASRR.F.test <- var.test(TD$BAS_Reward_totalscore, clinical$BAS_Reward_totalscore) #F=0.412, p=0.0868
 t.test(glucest$BAS_Reward_totalscore ~ glucest$Control_Coded, var.equal=TRUE)
@@ -300,5 +300,13 @@ t.test(glucest$PROMIS_totalscore ~ glucest$Control_Coded, var.equal=FALSE)
 PRIME.F.test <- var.test(TD$Prime_totalscore, clinical$Prime_totalscore) #F=0.0101, p=1.255e-11
 t.test(glucest$Prime_totalscore ~ glucest$Control_Coded, var.equal=FALSE)
 ```
-  
-  
+
+\newpage
+
+#BAS Reward Responsiveness Score in Males v. Females
+
+**Entire Sample**
+```{r}
+BASRR.F.test.sex <- var.test(glucest$BAS_Reward_totalscore ~ glucest$sex) #F=0.578, p=0.2797
+t.test(glucest$BAS_Reward_totalscore ~ glucest$sex, var.equal=TRUE)
+```
