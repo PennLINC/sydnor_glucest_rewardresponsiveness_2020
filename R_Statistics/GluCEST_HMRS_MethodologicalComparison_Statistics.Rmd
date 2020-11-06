@@ -1,0 +1,232 @@
+---
+title: 'Reward Network GluCEST and RR Statistics: HMRS VOI Analyses'
+author: "Valerie Jill Sydnor"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+    toc: yes
+    toc_depth: '5'
+theme: cerulean
+geometry: margin=1.9cm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/")
+knitr::opts_chunk$set(comment = NA)
+knitr::opts_chunk$set(tidy.opts=list(width.cutoff=65),tidy=TRUE)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(ppcor)
+```
+
+\newpage
+
+```{r include=FALSE}
+#read in sample demographics and clinical measures
+glucest <- read.csv("./GLUCEST-Clinical-Demographics-Measures-N45.csv", header=TRUE) #csv created by Prepare_Demographics_ClinicalMeasures_Data.Rmd
+```
+
+```{r include=FALSE}
+#read in HMRS VOI Volume and Coverage measures
+VOI.Coverage.MP2RAGEspace <- read.csv("./OutputMeasures/SVSROI-Coverage-MP2RAGEspace.csv", sep='\t', header=TRUE) #original volume of the VOI in MP2RAGE space and reward network/non-reward cortex VOI percent coverage
+VOI.Coverage.CESTspace <- read.csv("./OutputMeasures/SVSROI-Coverage-CESTspace.csv", sep='\t', header=TRUE) #volume of the VOI present in the CEST FOV, and reward network/non-reward cortex VOI coverage in CEST space
+
+#read in HMRS VOI GluCEST measures
+VOI.GluCEST <- read.csv("./OutputMeasures/GluCEST-SVSROI-Measures.csv", sep='\t', header=TRUE) #mean GluCEST in the SVS VOI
+VOI.Reward.GluCEST <- read.csv("./OutputMeasures/GluCEST-SVSROI-RewardNetwork-Measures.csv", sep='\t', header=TRUE) #mean GluCEST in the reward network portion of the SVS VOI
+VOI.NonReward.GluCEST <- read.csv("./OutputMeasures/GluCEST-SVSROI-NonReward-Measures.csv", sep='\t', header=TRUE) #mean GluCEST in the non-reward portion of the SVS VOI
+```
+
+```{r include=FALSE}
+#combine VOI Volume/Coverage and GluCEST measures
+VOI.GluCEST <- cbind(VOI.Coverage.MP2RAGEspace, VOI.Coverage.CESTspace, VOI.GluCEST, VOI.Reward.GluCEST, VOI.NonReward.GluCEST)
+VOI.GluCEST <- VOI.GluCEST[-5] #remove duplicate column for "Case"
+VOI.GluCEST <- VOI.GluCEST %>% dplyr::select(-Subject) #remove duplicate columns for "Subject"
+```
+
+```{r warning=FALSE, include=FALSE}
+#read in HMRS VOI Absolute Concentration measures
+
+#Identify GluCEST study sample cases that have 1HMRS data (N=25)
+setwd("~/Documents/ResearchProjects/GluCEST_BASRewardResponsivity_Project/sydnor_glucest_rewardresponsiveness_2020/R_Statistics/")
+system("./extract_sample_HMRSMeasures.sh", wait=TRUE) #bash script
+
+VOI.MRS <- read.csv("../../MRSMeasures/GluCEST-HMRS-ACC-VoxelData_Timept1_PassQC.csv", header=TRUE) #HMRS concentration measures
+VOI.MRS <- VOI.MRS %>% dplyr::rename("Case" = "ID")
+```
+
+\newpage 
+
+# Identify Final HMRS Sample Based on the Percent of HRMS VOI included in the GluCEST FOV
+
+**Calculate percent of the HMRS VOI included in the GluCEST FOV**
+```{r}
+VOI.GluCEST <- VOI.GluCEST %>% mutate(VOI.FOV.Overlap=((SVSROI_Volume_CESTspace/SVSROI_Total_MP2RAGEspace)*100))
+FOVcoverage <- data.frame(VOI.GluCEST$Case, VOI.GluCEST$VOI.FOV.Overlap)
+FOVcoverage %>% arrange(VOI.GluCEST.VOI.FOV.Overlap)
+```
+**Remove 5 participants with < 20% of the HMRS VOI included in the GluCEST FOV**
+```{r}
+VOI.MRS.GluCEST <- merge(glucest, VOI.MRS, by = "Case")
+VOI.MRS.GluCEST <- merge(VOI.MRS.GluCEST, VOI.GluCEST, by = "Case")
+VOI.MRS.GluCEST <- VOI.MRS.GluCEST %>% filter(VOI.FOV.Overlap > 20) #remove participants with very low overlap between the HMRS VOI and the GluCEST FOV to enable appropriate methodological comparison
+```
+
+**Examine HMRS VOI Coverage Characteristics**
+
+*Number of participants with > 20% of the HMRS VOI included in the GluCEST FOV*
+```{r}
+nrow(VOI.MRS.GluCEST)
+```
+
+*Participant Diagnostic Groups*
+```{r}
+table(VOI.MRS.GluCEST$Control_Coded)
+table(VOI.MRS.GluCEST$Diagnosis_NC_MDD_Pro_Schiz_Coded)
+```
+
+*Mean (SD) Percent of HMRS VOI included in the GluCEST FOV*
+```{r}
+mean(VOI.MRS.GluCEST$VOI.FOV.Overlap)
+sd(VOI.MRS.GluCEST$VOI.FOV.Overlap)
+```
+
+*Mean (SD) Percent of the HMRS VOI that falls within the Reward Network*
+```{r}
+mean(VOI.MRS.GluCEST$RewardNetwork_Percent_MP2RAGEspace)
+sd(VOI.MRS.GluCEST$RewardNetwork_Percent_MP2RAGEspace)
+```
+
+*Mean (SD) Percent of the SVS VOI that falls within Non-Reward Cortex*
+```{r}
+mean(VOI.MRS.GluCEST$NonReward_Percent_MP2RAGEspace)
+sd(VOI.MRS.GluCEST$NonReward_Percent_MP2RAGEspace)
+```
+
+\newpage 
+
+# Associations Between BAS RR Scores and Dual Method Anterior Cingulate Glutamate
+
+## HMRS
+
+### HMRS Glutamate Concentration and BAS RR
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between HMRS Glutamate and RR controlling for age, sex, and fCSF
+summary(lm(VOI.MRS.GluCEST$BAS_Reward_totalscore ~ VOI.MRS.GluCEST$Conc.Glu + VOI.MRS.GluCEST$age_scan + VOI.MRS.GluCEST$sex + VOI.MRS.GluCEST$fCSF))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(VOI.MRS.GluCEST$age_scan, VOI.MRS.GluCEST$sex, VOI.MRS.GluCEST$fCSF)
+pcor.test(VOI.MRS.GluCEST$Conc.Glu, VOI.MRS.GluCEST$BAS_Reward_totalscore, covariates)$estimate
+```
+
+
+\newpage
+
+## GluCEST
+
+### HMRS VOI GluCEST and BAS RR
+
+**Multiple Linear Regression**
+```{r}
+#linear regression between GluCEST in the HMRS VOI and RR controlling for age and sex
+summary(lm(VOI.MRS.GluCEST$BAS_Reward_totalscore ~ VOI.MRS.GluCEST$SVSROI_CEST_mean + VOI.MRS.GluCEST$age_scan + VOI.MRS.GluCEST$sex))
+```
+
+**Partial R**
+```{r}
+covariates <- data.frame(VOI.MRS.GluCEST$age_scan, VOI.MRS.GluCEST$sex)
+pcor.test(VOI.MRS.GluCEST$SVSROI_CEST_mean, VOI.MRS.GluCEST$BAS_Reward_totalscore, covariates)$estimate
+```
+
+### HMRS VOI Reward Network GluCEST and BAS RR
+
+**Partial R**
+```{r}
+covariates <- data.frame(VOI.MRS.GluCEST$age_scan, VOI.MRS.GluCEST$sex)
+pcor.test(VOI.MRS.GluCEST$SVSROI_Reward_CEST_mean, VOI.MRS.GluCEST$BAS_Reward_totalscore, covariates)$estimate
+```
+
+### HMRS VOI Non-Reward GluCEST and BAS RR
+
+**Partial R**
+```{r}
+covariates <- data.frame(VOI.MRS.GluCEST$age_scan, VOI.MRS.GluCEST$sex)
+pcor.test(VOI.MRS.GluCEST$SVSROI_NonReward_CEST_mean, VOI.MRS.GluCEST$BAS_Reward_totalscore, covariates)$estimate
+```
+
+\newpage
+
+# GluCEST- and 1HMRS-derived Measures of Brain Glutamate are Positively Correlated 
+
+## HMRS Glutamate and GluCEST
+
+*Full sample*
+```{r}
+pcor.test(VOI.MRS.GluCEST$Conc.Glu, VOI.MRS.GluCEST$SVSROI_CEST_mean, VOI.MRS.GluCEST$fCSF) 
+Glu.R <- pcor.test(VOI.MRS.GluCEST$Conc.Glu, VOI.MRS.GluCEST$SVSROI_CEST_mean, VOI.MRS.GluCEST$fCSF)$estimate
+```
+
+*Participants with > 50% of the HMRS VOI included in the GluCEST FOV*
+```{r}
+cordata <- VOI.MRS.GluCEST %>% dplyr::select(Conc.Glu,SVSROI_CEST_mean,VOI.FOV.Overlap,fCSF)
+cordata <- cordata %>% filter(VOI.FOV.Overlap > 50)
+pcor.test(cordata$Conc.Glu, cordata$SVSROI_CEST_mean, cordata$fCSF)
+```
+
+*Participants with > 90% of the SVS VOI included in the GluCEST FOV*
+```{r}
+cordata <- cordata %>% filter(VOI.FOV.Overlap > 90)
+pcor.test(cordata$Conc.Glu, cordata$SVSROI_CEST_mean, cordata$fCSF)
+```
+
+
+## HMRS NAA and GluCEST
+
+*Full sample*
+```{r}
+pcor.test(VOI.MRS.GluCEST$Conc.NAA, VOI.MRS.GluCEST$SVSROI_CEST_mean,  VOI.MRS.GluCEST$fCSF)
+NAA.R <- pcor.test(VOI.MRS.GluCEST$Conc.NAA, VOI.MRS.GluCEST$SVSROI_CEST_mean,  VOI.MRS.GluCEST$fCSF)$estimate
+```
+
+## HMRS GSH and GluCEST
+
+*Full sample*
+```{r}
+GSHdata <- VOI.MRS.GluCEST %>% dplyr::select(Conc.GSH , SVSROI_CEST_mean, VOI.FOV.Overlap, fCSF)
+GSHdata <- na.omit(GSHdata) # N=17 due to CRLB QC
+pcor.test(GSHdata$Conc.GSH, GSHdata$SVSROI_CEST_mean, GSHdata$fCSF)
+GSH.R <- pcor.test(GSHdata$Conc.GSH, GSHdata$SVSROI_CEST_mean, GSHdata$fCSF)$estimate
+```
+
+
+## HMRS Cr/Pcr and GluCEST
+
+*Full sample*
+```{r}
+pcor.test(VOI.MRS.GluCEST$Conc.Cr.PCr, VOI.MRS.GluCEST$SVSROI_CEST_mean, VOI.MRS.GluCEST$fCSF)
+CrPCr.R <- pcor.test(VOI.MRS.GluCEST$Conc.Cr.PCr, VOI.MRS.GluCEST$SVSROI_CEST_mean, VOI.MRS.GluCEST$fCSF)$estimate
+```
+
+\newpage 
+
+## Table of Correlation R Values
+```{r}
+Corrtable <- data.frame(Metabolite=character(), R.value=double())
+Corrtable <- Corrtable %>% add_row(Metabolite="Glutamate", R.value = Glu.R )
+Corrtable <- Corrtable %>% add_row(Metabolite="NAA", R.value = NAA.R)
+Corrtable <- Corrtable %>% add_row(Metabolite="GSH", R.value = GSH.R )
+Corrtable <- Corrtable %>% add_row(Metabolite="CrPCr", R.value = CrPCr.R)
+
+Corrtable %>%
+  arrange(desc(R.value)) %>%
+  kable() %>%
+  kable_styling()
+```
+
