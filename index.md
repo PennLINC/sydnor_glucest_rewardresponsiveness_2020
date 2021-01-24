@@ -1,3 +1,7 @@
+  
+  
+  
+
 # GluCEST Imaging of Reward Responsiveness
 
 ## Project Description
@@ -19,7 +23,7 @@ Christian Kohler, Andrew J. D. Crow, Sage L. Rush, Monica E. Calkins, Ruben C. G
 September 2018
 
 ### Current Project Status
-Published in Molecular Psychiatry, 2021 as **Diminished reward responsiveness is associated with lower reward network GluCEST: an ultra-high field glutamate imaging study**
+Published in Molecular Psychiatry (2021) as **Diminished reward responsiveness is associated with lower reward network GluCEST: an ultra-high field glutamate imaging study**
 
 ### Datasets
 818621 - SYRP, 828612 - URF, 825940 - GluCEST in Psychosis, 825834 - satterttPiloting
