@@ -51,11 +51,14 @@ The steps below detail how to replicate all aspects of this project, from neuroi
 <br>
 <br>
 2. Run [/Processing_Pipeline/MP2RAGE_Processing_Pipeline.sh](https://github.com/PennLINC/sydnor_glucest_rewardresponsiveness_2020/blob/master/Processing_Pipeline/MP2RAGE_Processing_Pipeline.sh) to process raw 7T Terra MP2RAGE structural data.
-> This script executes the following: UNI and INV2 dicom to nifti conversion, structural brain masking, ANTS N4 bias field correction, FSL FAST (for tissue segmentation and gray matter probability maps), UNI to MNI registration with ANTS SyN (rigid+affine+deformable syn)
+
+    > This script executes the following: UNI and INV2 dicom to nifti conversion, structural brain masking, ANTS N4 bias field correction, FSL FAST     (for tissue segmentation and gray matter probability maps), UNI to MNI registration with ANTS SyN (rigid+affine+deformable syn)
+    
 <br>
 <br>
 3. Run [/Processing_Pipeline/GluCEST_Processing_Pipeline.sh](https://github.com/PennLINC/sydnor_glucest_rewardresponsiveness_2020/blob/master/Processing_Pipeline/GluCEST_Processing_Pipeline.sh) to process the 7T Terra GluCEST data output by cest2d_TERRA_SYRP.
-    > This script executes the following: dicom to nifti conversion for Matlab generated B0 maps, B1 maps, and B0B1-corrected GluCEST dicoms, B0 and B1 map thresholding of GluCEST images, CSF removal from GluCEST images, GluCEST brain masking, registration of atlases from MNI space to participant UNI images, registration of FAST segmentation and reward atlas slices to GluCEST images, generation of reward network anatomical and valence-encoding subcomponent masks
+
+> This script executes the following: dicom to nifti conversion for Matlab generated B0 maps, B1 maps, and B0B1-corrected GluCEST dicoms, B0 and B1 map thresholding of GluCEST images, CSF removal from GluCEST images, GluCEST brain masking, registration of atlases from MNI space to participant UNI images, registration of FAST segmentation and reward atlas slices to GluCEST images, generation of reward network anatomical and valence-encoding subcomponent masks
 <br>
 <br>
 4. Run [/Processing_Pipeline/RewardNetwork_Heatmap.sh](https://github.com/PennLINC/sydnor_glucest_rewardresponsiveness_2020/blob/master/Processing_Pipeline/RewardNetwork_Heatmap.sh) to generate a reward network map that only includes voxels for which greater than 50% of participants had GluCEST data (used for coverage sensitivity analysis).
