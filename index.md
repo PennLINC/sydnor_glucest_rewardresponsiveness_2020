@@ -25,18 +25,18 @@ Published in Molecular Psychiatry, 2021. Diminished reward responsiveness is ass
 818621 - SYRP, 828612 - URF, 825940 - GluCEST in Psychosis, 825834 - satterttPiloting
 
 ### Github Repository
-https://github.com/PennLINC/sydnor_glucest_rewardresponsiveness_2020
+<https://github.com/PennLINC/sydnor_glucest_rewardresponsiveness_2020>
 
 ### Path to Data on Filesystem 
 /data/jux/BBL/projects/sydnor_glucest/GluCEST_BASReward_Project
 
-### Publication DOI
-https://doi.org/10.1038/s41380-020-00986-y
-
-### Presentations
-- Symposium at The Schizophrenia International Research Society Annual Meeting, April 2021. *Imaging Glutamate in Schizophrenia: Novel Methods and Big Data.*  
-- Oral presentation at the The Organization for Human Brain Mapping Annual Meeting, June 2020. *Lower Reward Network Glutamate is Associated with Diminished Reward Responsiveness.*  
-- Poster presentation at The Society of Biological Psychiatry Annual Meeting, May 2020. *Reward Network Glutamate Level is Associated with Dimensional Reward Responsiveness.* https://doi.org/10.1016/j.biopsych.2020.02.567  
-- Poster presentation at The 8th International Workshop on Chemical Exchange Saturation Transfer Imaging, November 2020. *GluCEST Imaging of the Reward Network Provides Novel Evidence of a Relationship between Brain Glutamate and Reward Responsiveness in Humans.*
+> ### Publication DOI
+> <https://doi.org/10.1038/s41380-020-00986-y>
+>
+> ### Presentations
+> - Symposium at The Schizophrenia International Research Society Annual Meeting, April 2021. *Imaging Glutamate in Schizophrenia: Novel Methods and Big Data.*  
+> - Oral presentation at the The Organization for Human Brain Mapping Annual Meeting, June 2020. *Lower Reward Network Glutamate is Associated with Diminished Reward Responsiveness.*  
+> - Poster presentation at The Society of Biological Psychiatry Annual Meeting, May 2020. *Reward Network Glutamate Level is Associated with Dimensional Reward Responsiveness.* <https://doi.org/10.1016/j.biopsych.2020.02.567>  
+> - Poster presentation at The 8th International Workshop on Chemical Exchange Saturation Transfer Imaging, November 2020. *GluCEST Imaging of the Reward Network Provides Novel Evidence of a Relationship between Brain Glutamate and Reward Responsiveness in Humans.*
 
 ## Code Documentation
