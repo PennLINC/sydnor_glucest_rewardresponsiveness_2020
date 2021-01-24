@@ -1,7 +1,7 @@
 <br>
 <br>
 <br>
-# GluCEST Imaging of Reward Responsiveness
+# GluCEST IMAGING OF REWARD RESPONSIVENESS
 
 ## Project Description
 
