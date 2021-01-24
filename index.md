@@ -1,6 +1,3 @@
-<br>
-<br>
-<br>
 # GluCEST IMAGING OF REWARD RESPONSIVENESS
 
 ## Project Description
